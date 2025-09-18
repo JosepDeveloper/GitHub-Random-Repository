@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import Emty from "@/components/Emty.vue";
 import Error from "@/components/Error.vue";
+import Loading from "@/components/Loading.vue";
 import SelectLanguages from "@/components/SelectLanguages.vue";
 import Github from "@/components/icons/GitHub.vue";
+import { getRandomRepository } from "@/lib/query";
 import { reactive, ref } from "vue";
 
 const STATE = {
@@ -45,13 +47,24 @@ function getAllLanguages() {
     <main class="mt-14">
       <div class="flex flex-col gap-4">
         <SelectLanguages ref="selectLanguages"
-          @error="(message) => { state.appState = STATE.ERROR; state.errorMessage = message }" />
+          @error="(message) => { state.appState = STATE.ERROR; state.errorMessage = message }" @change-language="(language) => {
+            state.appState = STATE.LOADING
+
+            getRandomRepository(language).then((data) => {
+              console.log(data)
+
+              state.appState = STATE.SUCCESS
+            }).catch(() => {
+              state.appState = STATE.ERROR
+              state.errorMessage = 'Failed to get repository data'
+            })
+          }" />
 
         <div v-if="state.appState === STATE.EMPTY">
           <Emty />
         </div>
         <div v-else-if="state.appState === STATE.LOADING">
-          LOADING
+          <Loading />
         </div>
         <div v-else-if="state.appState === STATE.SUCCESS">
           SUCCESS
