@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Emty from "@/components/Emty.vue";
-import Error from "@/components/Error.vue";
+import ErrorComponent from "@/components/Error.vue";
 import Loading from "@/components/Loading.vue";
 import SelectLanguages from "@/components/SelectLanguages.vue";
 import Github from "@/components/icons/GitHub.vue";
@@ -70,7 +70,7 @@ function getAllLanguages() {
           SUCCESS
         </div>
         <div v-else-if="state.appState === STATE.ERROR">
-          <Error :error="state.errorMessage" @reload="() => {
+          <ErrorComponent :error="state.errorMessage" @reload="() => {
             state.appState = STATE.EMPTY
             getAllLanguages()
           }" />
