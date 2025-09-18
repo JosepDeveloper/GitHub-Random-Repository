@@ -9,7 +9,9 @@ const state = reactive({
 	error: false,
 });
 
-const emitError = defineEmits(["error"]);
+const emitError = defineEmits<{
+	error: [message: string];
+}>();
 
 const getMessage = computed(() => {
 	if (state.error) {
@@ -30,7 +32,7 @@ const getAllLanguages = async () => {
 			state.languages = languages;
 		} catch {
 			state.error = true;
-			emitError("error");
+			emitError("error", "Failed to fetch languages");
 		}
 
 		return;
@@ -40,11 +42,18 @@ const getAllLanguages = async () => {
 	state.languages = storedLanguages ? JSON.parse(storedLanguages) : [];
 };
 
+defineExpose<{
+	getAllLanguages: () => void;
+}>({
+	getAllLanguages
+})
+
 getAllLanguages();
 </script>
 
 <template>
-  <form class="flex justify-center">
-    <Select :options="state.languages" optionLabel="title" :placeholder="getMessage" class="w-[210px]" :disabled="state.languages.length === 0" />
-  </form>
+	<form class="flex justify-center">
+		<Select :options="state.languages" optionLabel="title" :placeholder="getMessage" class="w-[210px]"
+			:disabled="state.languages.length === 0" />
+	</form>
 </template>
