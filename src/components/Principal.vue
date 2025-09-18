@@ -1,21 +1,38 @@
 <script setup lang="ts">
 import Emty from "@/components/Emty.vue";
+import Error from "@/components/Error.vue";
 import SelectLanguages from "@/components/SelectLanguages.vue";
 import Github from "@/components/icons/GitHub.vue";
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 
 const STATE = {
-	EMPTY: 0,
-	LOADING: 1,
-	SUCCESS: 2,
-	ERROR: 3,
+  EMPTY: 0,
+  LOADING: 1,
+  SUCCESS: 2,
+  ERROR: 3,
 } as const;
 
 type State = (typeof STATE)[keyof typeof STATE];
 
-const state = reactive({
-	appState: STATE.EMPTY as State,
+const state = reactive<{
+  appState: State;
+  errorMessage: string | undefined;
+}>({
+  appState: STATE.EMPTY,
+  errorMessage: undefined,
 });
+
+const selectLanguages = ref<
+  {
+    getAllLanguages: () => void
+  } | null
+>(null)
+
+function getAllLanguages() {
+  if (selectLanguages.value) {
+    selectLanguages.value.getAllLanguages()
+  }
+}
 </script>
 
 <template>
@@ -27,7 +44,8 @@ const state = reactive({
 
     <main class="mt-14">
       <div class="flex flex-col gap-4">
-        <SelectLanguages @error="() => { state.appState = STATE.ERROR }" />
+        <SelectLanguages ref="selectLanguages"
+          @error="(message) => { state.appState = STATE.ERROR; state.errorMessage = message }" />
 
         <div v-if="state.appState === STATE.EMPTY">
           <Emty />
@@ -39,7 +57,10 @@ const state = reactive({
           SUCCESS
         </div>
         <div v-else-if="state.appState === STATE.ERROR">
-          ERROR
+          <Error :error="state.errorMessage" @reload="() => {
+            state.appState = STATE.EMPTY
+            getAllLanguages()
+          }" />
         </div>
         <div v-else>
           I have no idea how you got here. 🤨
@@ -48,18 +69,20 @@ const state = reactive({
     </main>
 
     <footer class="self-end flex justify-center">
-      <a href="https://github.com/JosepDeveloper" target="_blank" rel="noopener" class="text-center font-medium text-white/60 inline-flex items-center gap-1">
-        Develoment with ❤️ by JosepDeveloper <Github />
+      <a href="https://github.com/JosepDeveloper" target="_blank" rel="noopener"
+        class="text-center font-medium text-white/60 inline-flex items-center gap-1">
+        Develoment with ❤️ by JosepDeveloper
+        <Github />
       </a>
     </footer>
   </div>
 </template>
 
 <style scoped>
-  div {
-    height: 100%;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    justify-content: center;
-  }
+div {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-content: center;
+}
 </style>
