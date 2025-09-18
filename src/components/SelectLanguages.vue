@@ -22,14 +22,25 @@ const getMessage = computed(() => {
 	return "Select a language";
 });
 
-getLanguages()
-	.then((response) => {
-		state.languages.splice(0, state.languages.length, ...response);
-	})
-	.catch(() => {
-		state.error = true;
-		emitError("error");
-	});
+const getAllLanguages = async () => {
+	if (localStorage.getItem("languages") == null) {
+		try {
+			const languages = await getLanguages();
+			localStorage.setItem("languages", JSON.stringify(languages));
+			state.languages = languages;
+		} catch {
+			state.error = true;
+			emitError("error");
+		}
+
+		return;
+	}
+
+	const storedLanguages = localStorage.getItem("languages");
+	state.languages = storedLanguages ? JSON.parse(storedLanguages) : [];
+};
+
+getAllLanguages();
 </script>
 
 <template>
