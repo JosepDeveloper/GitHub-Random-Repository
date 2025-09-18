@@ -11,6 +11,7 @@ const state = reactive({
 
 const emitError = defineEmits<{
 	error: [message: string];
+	changeLanguage: [language: string]
 }>();
 
 const getMessage = computed(() => {
@@ -54,6 +55,8 @@ getAllLanguages();
 <template>
 	<form class="flex justify-center">
 		<Select :options="state.languages" optionLabel="title" :placeholder="getMessage" class="w-[210px]"
-			:disabled="state.languages.length === 0" />
+			:disabled="state.languages.length === 0" @value-change="(event) => {
+				$emit('changeLanguage', event.value)
+			}" />
 	</form>
 </template>
