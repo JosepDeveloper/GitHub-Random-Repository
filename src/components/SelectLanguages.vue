@@ -44,7 +44,7 @@ getAllLanguages();
 </script>
 
 <template>
-  <form>
+  <form class="flex justify-center">
     <Select :options="state.languages" optionLabel="title" :placeholder="getMessage" class="w-[210px]" :disabled="state.languages.length === 0" />
   </form>
 </template>
