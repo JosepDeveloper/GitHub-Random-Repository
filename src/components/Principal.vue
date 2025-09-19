@@ -7,20 +7,20 @@ import Github from "@/components/icons/GitHub.vue";
 import { getRandomRepository } from "@/lib/query";
 import { reactive, ref } from "vue";
 
-const STATE = {
+const APP_STATE = {
   EMPTY: 0,
   LOADING: 1,
   SUCCESS: 2,
   ERROR: 3,
 } as const;
 
-type State = (typeof STATE)[keyof typeof STATE];
+type AppState = (typeof APP_STATE)[keyof typeof APP_STATE];
 
 const state = reactive<{
-  appState: State;
+  appState: AppState;
   errorMessage: string | undefined;
 }>({
-  appState: STATE.EMPTY,
+  appState: APP_STATE.EMPTY,
   errorMessage: undefined,
 });
 
@@ -47,31 +47,29 @@ function getAllLanguages() {
     <main class="mt-14">
       <div class="flex flex-col gap-4">
         <SelectLanguages ref="selectLanguages"
-          @error="(message) => { state.appState = STATE.ERROR; state.errorMessage = message }" @change-language="(language) => {
-            state.appState = STATE.LOADING
+          @error="(message) => { state.appState = APP_STATE.ERROR; state.errorMessage = message }" @change-language="(language) => {
+            state.appState = APP_STATE.LOADING
 
             getRandomRepository(language).then((data) => {
-              console.log(data)
-
-              state.appState = STATE.SUCCESS
+              state.appState = APP_STATE.SUCCESS
             }).catch(() => {
-              state.appState = STATE.ERROR
+              state.appState = APP_STATE.ERROR
               state.errorMessage = 'Failed to get repository data'
             })
           }" />
 
-        <div v-if="state.appState === STATE.EMPTY">
+        <div v-if="state.appState === APP_STATE.EMPTY">
           <Emty />
         </div>
-        <div v-else-if="state.appState === STATE.LOADING">
+        <div v-else-if="state.appState === APP_STATE.LOADING">
           <Loading />
         </div>
-        <div v-else-if="state.appState === STATE.SUCCESS">
+        <div v-else-if="state.appState === APP_STATE.SUCCESS">
           SUCCESS
         </div>
-        <div v-else-if="state.appState === STATE.ERROR">
+        <div v-else-if="state.appState === APP_STATE.ERROR">
           <ErrorComponent :error="state.errorMessage" @reload="() => {
-            state.appState = STATE.EMPTY
+            state.appState = APP_STATE.EMPTY
             getAllLanguages()
           }" />
         </div>
