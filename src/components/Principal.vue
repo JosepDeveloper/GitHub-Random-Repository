@@ -3,6 +3,7 @@ import Emty from "@/components/Emty.vue";
 import ErrorComponent from "@/components/Error.vue";
 import Loading from "@/components/Loading.vue";
 import SelectLanguages from "@/components/SelectLanguages.vue";
+import Success from "@/components/Success.vue";
 import Github from "@/components/icons/GitHub.vue";
 import { getRandomRepository } from "@/lib/query";
 import { reactive, ref } from "vue";
@@ -19,9 +20,22 @@ type AppState = (typeof APP_STATE)[keyof typeof APP_STATE];
 const state = reactive<{
   appState: AppState;
   errorMessage: string | undefined;
+  languageToSearch: string;
+  repositoryData?: {
+    id: number;
+    name: string;
+    fullName: string;
+    description: string;
+    language: string;
+    stars: number;
+    forksCount: number;
+    openIssues: number;
+  };
 }>({
   appState: APP_STATE.EMPTY,
+  languageToSearch: '',
   errorMessage: undefined,
+  repositoryData: undefined
 });
 
 const selectLanguages = ref<
@@ -34,6 +48,18 @@ function getAllLanguages() {
   if (selectLanguages.value) {
     selectLanguages.value.getAllLanguages()
   }
+}
+
+function getRepository(language: string) {
+  state.appState = APP_STATE.LOADING
+
+  getRandomRepository(language).then((data) => {
+    state.repositoryData = data
+    state.appState = APP_STATE.SUCCESS
+  }).catch(() => {
+    state.appState = APP_STATE.ERROR
+    state.errorMessage = 'Failed to get repository data'
+  })
 }
 </script>
 
@@ -48,14 +74,8 @@ function getAllLanguages() {
       <div class="flex flex-col gap-4">
         <SelectLanguages ref="selectLanguages"
           @error="(message) => { state.appState = APP_STATE.ERROR; state.errorMessage = message }" @change-language="(language) => {
-            state.appState = APP_STATE.LOADING
-
-            getRandomRepository(language).then((data) => {
-              state.appState = APP_STATE.SUCCESS
-            }).catch(() => {
-              state.appState = APP_STATE.ERROR
-              state.errorMessage = 'Failed to get repository data'
-            })
+            state.languageToSearch = language
+            getRepository(language)
           }" />
 
         <div v-if="state.appState === APP_STATE.EMPTY">
@@ -64,13 +84,17 @@ function getAllLanguages() {
         <div v-else-if="state.appState === APP_STATE.LOADING">
           <Loading />
         </div>
-        <div v-else-if="state.appState === APP_STATE.SUCCESS">
-          SUCCESS
+        <div v-else-if="state.appState === APP_STATE.SUCCESS && state.repositoryData"
+          style="display: flex; height: fit-content;" class="w-full justify-center flex-col items-center gap-5">
+          <Success :repository-data="state.repositoryData" @refresh="() => {
+            getRepository(state.languageToSearch)
+          }" />
         </div>
         <div v-else-if="state.appState === APP_STATE.ERROR">
           <ErrorComponent :error="state.errorMessage" @reload="() => {
             state.appState = APP_STATE.EMPTY
             getAllLanguages()
+            getRepository(state.languageToSearch)
           }" />
         </div>
         <div v-else>

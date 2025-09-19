@@ -43,8 +43,8 @@ export function getRandomRepository(language: string) {
 		return {
 			id: repositoryData.id,
 			name: repositoryData.name,
-			full_name: repositoryData.full_name,
-			descriptoin: repositoryData.description,
+			fullName: repositoryData.full_name,
+			description: repositoryData.description,
 			language: repositoryData.language,
 			stars: repositoryData.stargazers_count,
 			forksCount: repositoryData.forks_count,
